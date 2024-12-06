@@ -1,0 +1,14 @@
+// COSTANTS
+const int maxn,inf,mod
+// TREE DATA STRUCTURE
+// fenwick tree (sum)
+int bit[maxn];
+void upd(int u,int val){
+for(;u<=n;u+=u&(-u))
+bit[u]+=val;
+}
+int get(int u,int  val=0){
+for(;u>0;u-=u&(-u))
+val+=bit[u];
+return val;
+}
