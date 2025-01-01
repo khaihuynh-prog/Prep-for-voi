@@ -1,14 +1,349 @@
-// COSTANTS
-const int maxn,inf,mod
-// TREE DATA STRUCTURE
-// fenwick tree (sum)
+#include<bits/stdc++.h>
+using namespace std;
+#define int long long
+#define double long double
+#define opin ios_base::sync_with_stdio(false);cin.tie(NULL);
+#define pii pair<long long,long long>
+#define fi first
+#define se second
+#define pb push_back
+#define fr(i,l,r) for(int i = l;i<=r;++i)
+#define frd(i,l,r) for(int i=r;i>=l;--i)
+#define mset(a,val) memset(a,val,sizeof(a))
+#define all(a) a.begin(),a.end()
+#define vec vector
+#define sz size
+class LIST{
+class deque_stack{
+//deque min - max
+void deq(){
+	deque<int> q;
+	fr(i,1,n){
+		while(q.sz() && q.back<=a[i])q.pop_back();
+		q.pb(a[i]);
+		if(q.sz()>k)q.pop_front();
+		f[i]=q.front();
+	}
+}
+};
+class math{
+// fast mod
+int power(int b,int a){
+	int res=1;
+	while(a>0){
+		if(a&1)res=(res*b)%mod;
+		a>>=1;
+		b=(b*b)%mod;
+	}
+	return res;
+}
+// a/b mod c = a*power(b,c-2) mod c
+};
+class tree{
+// lca
+void dfs(int u) {
+    for (int v : g[u]) {
+        if (v == up[u][0]) continue;
+        h[v] = h[u] + 1;
+
+        up[v][0] = u;
+        for (int j = 1; j < 20; ++j)
+            up[v][j] = up[up[v][j - 1]][j - 1];
+
+        dfs(v);
+    }
+}
+int h[N], up[N][20];
+int lca(int u, int v) {
+    if (h[u] != h[v]) {
+        if (h[u] < h[v]) swap(u, v);
+
+        // Tìm tổ tiên u' của u sao cho h(u') = h(v)
+        int k = h[u] - h[v];
+        for (int j = 0; (1 << j) <= k; ++j)
+            if (k >> j & 1) // Nếu bit thứ j của k là 1
+                u = up[u][j];
+    }
+    if (u == v) return u;
+
+    // Tìm lca(u, v)
+    int k = __lg(h[u]);
+    for (int j = k; j >= 0; --j)
+        if (up[u][j] != up[v][j]) // Nếu tổ tiên thứ 2^j của u và v khác nhau
+            u = up[u][j], v = up[v][j];
+    return up[u][0];
+}
+// segment tree(sum)
+void build(int i,int l,int r){
+	if(l==r){
+		cin >> a[l];
+		st[i]=a[l];
+		return;
+	}
+	int mid = l+r>>1;
+	build(i*2,l,mid);
+	build(i*2+1,mid+1,r);
+	st[i]=st[i*2]+st[i*2+1];
+}
+int get(int i,int l,int r,int u,int v){
+	if(l>v || r<u)return 0;
+	if(l>=u && r<=v){
+		return st[i];
+	}
+	int mid  = l+r>>1;
+	return get*(i*2,l,mid,u,v)+get(i*2+1,mid+1,r,u,v);
+}
+void upd(int i,int l,int r,int u,int v,int val){
+	if(l>v || r<u)return 0;
+	if(l>=u && r<=v){
+		st[i]+=val;
+		return;
+	}
+	int mid  = l+r>>1;
+	upd(i*2,l,mid,u,v,val);
+	upd(i*2+1,mid+1,r,u,v,val);
+	st[i]=st[i*2]+st[i*2+1];
+}
+// IT lazy
+int n,a[maxn];
+struct node{
+	int v,lz;
+}st[maxn];
+void down(int i){
+	int v = st[i].lz;
+	if(v==0)return;
+	st[i*2].v+=v;
+	st[i*2+1].v+=v;
+	st[i*2].lz+=v;
+	st[i*2+1].lz+=v;
+	st[i].lz=0;
+}
+void build(int i,int l,int r){
+	if(l==r){
+		cin >> a[l];
+		st[i].v=a[l];
+		return;
+	}
+	int mid = l+r>>1;
+	build(i*2,l,mid);
+	build(i*2+1,mid+1,r);
+	st[i].v=st[i*2+1].v+st[i*2].v;
+}
+void upd(int i,int l,int r,int u,int v,int val){
+	if(l>v || r<u)return;
+	if(l>=u && r<=v){
+		st[i].v+=val;
+		st[i].lz+=val;
+		return;
+	}
+	down(i);
+	int mid = l+r>>1;
+	upd(i<<1,l,mid,u,v,val);
+	upd(i<<1|1,mid+1,r,u,v,val);
+	st[i].v=st[i<<1].v+st[i<<1|1].v;
+}
+int get(int i,int l,int r,int p){
+	if(l==r)return st[i].v;
+	down(i);
+	int mid = l+r>>1;
+	if(p<=mid)return get(i<<1,l,mid,p);
+	else return get(i<<1|1,mid+1,r,p);
+}
+// fenwick tree(sum)
 int bit[maxn];
 void upd(int u,int val){
-for(;u<=n;u+=u&(-u))
-bit[u]+=val;
+	while(u<=n){
+		bit[u]+=val;
+		u+=u&(-u);
+	}
 }
-int get(int u,int  val=0){
-for(;u>0;u-=u&(-u))
-val+=bit[u];
-return val;
+int get(int u){
+	int val=0;
+	while(u>0){
+		val+=bit[u];
+		u-=u&(-u);
+	}
+	return val;
 }
+// ranged fenwick tree(sum)
+struct fen{
+	int bit[maxn]=0;
+	void upd(int u,int val){
+		while(u<=n){
+			bit[u]+=val;
+			u+=u&(-u);
+		}
+	}
+	int get(int u){
+		int val=0;
+		while(u>0){
+			val+=bit[u];
+			u-=u&(-u);
+		}
+		return val;
+	}
+}st[2];
+void upd(int l,int r,int val){
+	st[0].upd(l,val);
+	st[0].upd(r+1,-val);
+	st[1].upd(l,val*(l-1));
+	st[1].upd(r+1,-val*r);
+}
+int get(int l,int r){
+	int sum1 = st[0].get(r)*r-st[1].get(r);
+	int sum2 = st[0].get(l-1)*(l-1)-st[1].get(l-1);
+	return sum1-sum2;
+}
+};
+class graph{
+// khop va cau
+int n,m,low[maxn],num[maxn],khop=0,cau=0,dd[maxn];
+vec<int> adj[maxn];
+stack<int> st; // If no tarjan ignore st and dd
+void dfs(int u,int p=0){
+	low[u]=num[u]=++num[0];
+	int child=0;
+	int iskhop=0;
+	for(auto v : adj[u])
+	if(v!=p && !dd[v]){
+		if(!num[v]){
+		child++;
+		dfs(v,u);
+		if(low[v]>=num[u] && (p!=0 || (child>1)))iskhop=1;
+		low[u]=min(low[u],low[v]);
+		}
+		else low[u]=min(low[u],num[v]);
+	}
+	khop+=iskhop;
+	if(low[u]<num[u] || p==0)return;
+	cau++;
+	while(st.size()){
+		int k =st.top();
+		st.pop();
+		dd[k]=1;
+		if(k==u)return;
+	}
+}
+
+// dijkstra
+void dij(int s){
+	vec<int> d(maxn,inf);
+	d[s]=0;
+	priority_queue<pii,vec<pii>,greater<pii>> q;
+	q.push({0,s});
+	while(q.size()){
+		int dinh = q.top().se,val=q.top().fi;
+		q.pop();
+		if(val<=d[dinh]){
+			for(auto canh : b[dinh]){
+				int v= canh.fi,w=canh.se;
+				if(d[v]<=d[dinh]+w){
+					d[v]=d[dinh]+w;
+					q.push({d[v],v});
+				}
+			}
+		}
+	}
+}
+// floyd
+void floyd(){
+	int dp[501][501];
+	fr(i,1,n)
+	fr(j,1,n)
+	fr(k,1,n)
+	dp[i][j]=min(dp[i][j],dp[i][k]+dp[k][j]);
+}
+// DSU - MST
+int pa[maxn],sz[maxn];
+struct edge{
+	int u,v,w;
+	operator < (edge a){
+		return a.w;
+	}
+};
+vec<edge> b;
+int fp(int v){
+	if(pa[v]==0)pa[v]=v;
+	return pa[v]==v?v:pa[v]=fp(pa[v]);
+}
+bool dsu(int u,int v){
+	a=fp(a),b=fp(b);
+	if(a==b)return false;
+	if(sz[a]<sz[b])swap(a,b);
+	pa[b]=a;
+	sz[a]+=sz[b];
+	return true;
+}
+void mst(){
+	sort(all(b));
+	int res=0;
+	for(edge a : b){
+		if(uni(a.u,a.v))res+=a.w;
+	}
+	cout << res;
+}
+};
+class primes{
+// prime checking
+// normal
+bool cpri(int u){
+	if(u<=1)return false;
+	if(u<=3)return true;
+	for(int i = 2;i*i<=u;++i)if(u%i==0)return false;
+	return true;
+}
+// linear sieve 
+vec<int> lp(n+1),prime;
+void sieve(){
+	for(int i = 2;i<=maxn;++i){
+		if(lp[i]==0){
+			lp[i]=i;
+			prime.pb(i);
+		}
+		for(int j = 0;i*prime[j]<=N && prime[j]<=lp[i] && j<prime.size(); ++j)
+		lp[i*prime[j]]=prime[j];
+	}
+ 	}
+};
+class string_operations{
+	const int base=  31,mod = 1e9+7;
+	int p[maxn],l[maxn],r[maxn];
+	int getl(int L,int R){
+		return (l[R]-(l[L-1]*p[R-L+1]%mod)%mod + mod)%mod;
+	}
+	int getr(int L,int R){
+		return (r[L] - r[R+1]*p[(R-L+1)]%mod + mod)%mod;
+	}
+	bool check(int l,int r){
+		return getl(l,r)==getr(l,r);
+	}
+	void hash(string s){
+		p[0]=1;
+		int n = s.size();
+		s=  ' '+s;
+		fr(i,1,n{
+			p[i]=p[i-1]*i;
+			l[i]=((s[i]-'0') + l[i-1]*base%mod)%mod;
+			r[n-i+1] =(r[n-i+2]*base%mod + (s[n-i+1]-'0'))%mod;
+		}
+	}
+};
+class Time_complex{
+// Dpt
+/*
+	O(1) = INF
+	O(sqrt(n)) = 1e12
+	O(nlog(n)) = 1e6
+	O(n*sqrt(n)) = 2e5
+	O(n^2) = 1e4
+	O(n^3) = 500
+	O(n^4) = 100
+	O(2^n) = 20
+	O(n!) = 11
+*/
+};
+};
+signed main(){
+	
+}
+
